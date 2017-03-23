@@ -40,9 +40,10 @@ def main(argv = None):
         if i%100 == 0:
             print("step %d, Test accuracy %g"%(i,  Testing(session)))
         ## trianing
-        [_, loss] = session.run([trainStep, crossEntropy],feed_dict={x: imageBatch, output: labelBatch, keepProbe: 0.5, learningRate: 0.1})  #learning rate 0.1
+        # if learningRate is 0.1  first ablot 10 step loss will go large and to nan, and network can't learning anything
+        [_, loss] = session.run([trainStep, crossEntropy],feed_dict={x: imageBatch, output: labelBatch, keepProbe: 0.5, learningRate: 0.001})  #learning rate 0.1
         print(loss)
-    
+
     for i in range(18760): #81~121 epochs
         imageBatch, labelBatch = Cifar10Manager.TakeRandomTranningSampleBatch(tranningSet, 128)
         ## test every 100 step
