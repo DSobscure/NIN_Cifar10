@@ -25,43 +25,67 @@ def main(argv = None):
 
     session = TensorFlow.InteractiveSession()
     session.run(TensorFlow.global_variables_initializer())
-
+    saver = TensorFlow.train.Saver()
+    lossSum = 0.
+    
     def Testing(sess):
         acc = 0.0
-        for i in range(1,11):  
+        for i in range(1,11):
             image = Numpy.array(testingImageSet[0+(i-1)*1000:1000*i])
             label = Numpy.array(testingLabelSet[0+(i-1)*1000:1000*i])
             acc= acc + accuracy.eval(session=sess, feed_dict={x: image, output: label, keepProbe: 1.0})
         return acc/10
 
-    for i in range(37520): #1~80 epochs
+    for i in range(1,32001): #1~80 epochs
         imageBatch, labelBatch = Cifar10Manager.TakeRandomTranningSampleBatch(tranningSet, 128)
-        ## test every 100 step
-        if i%100 == 0:
-            print("step %d, Test accuracy %g"%(i,  Testing(session)))
+        ## test every epochs
+        if i%400 == 0:
+            acc = Testing(session)
+            print("step %d, Test accuracy %g loss %g"%(i,  acc, lossSum/400))
+            with open('../Models/record', 'a') as file:
+                file.writelines(str(acc) + "\t" + str(lossSum/400) + "\n")
+            lossSum = 0.
         ## trianing
-        # if learningRate is 0.1  first ablot 10 step loss will go large and to nan, and network can't learning anything
-        [_, loss] = session.run([trainStep, crossEntropy],feed_dict={x: imageBatch, output: labelBatch, keepProbe: 0.5, learningRate: 0.001})  #learning rate 0.1
-        print(loss)
+        [_, loss] = session.run([trainStep, crossEntropy],feed_dict={x: imageBatch, output: labelBatch, keepProbe: 0.5, learningRate: 0.01})  #learning rate 0.01
+        lossSum = lossSum + loss
+        
+    savePath = saver.save(session, "../Models/model.ckpt")
+    print("Model saved in file: %s" % savePath)
 
-    for i in range(18760): #81~121 epochs
+    for i in range(1,32001): #81~160 epochs
         imageBatch, labelBatch = Cifar10Manager.TakeRandomTranningSampleBatch(tranningSet, 128)
         ## test every 100 step
-        if i%100 == 0:
-            print("step %d, Test accuracy %g"%(i,  Testing(session)))
+        if i%400 == 0:
+            acc = Testing(session)
+            print("step %d, Test accuracy %g loss %g"%(i,  acc, lossSum/400))
+            with open('../Models/record', 'a') as file:
+                file.writelines(str(acc) + "\t" + str(lossSum/400) + "\n")
+            lossSum = 0.
         ## trianing
-        trainStep.run(feed_dict={x: imageBatch, output: labelBatch, keepProbe: 0.5, learningRate: 0.01})  #learning rate 0.01
+        [_, loss] = session.run([trainStep, crossEntropy],feed_dict={x: imageBatch, output: labelBatch, keepProbe: 0.5, learningRate: 0.005})  #learning rate 0.05
+        lossSum = lossSum + loss
     
-    for i in range(18760): #122~164 epochs
+    savePath = saver.save(session, "../Models/model.ckpt")
+    print("Model saved in file: %s" % savePath)
+
+    for i in range(1,16001): #161~200 epochs
         imageBatch, labelBatch = Cifar10Manager.TakeRandomTranningSampleBatch(tranningSet, 128)
         ## test every 100 step
-        if i%100 == 0:
-            print("step %d, Test accuracy %g"%(i,  Testing(session)))
+        if i%400 == 0:
+            acc = Testing(session)
+            print("step %d, Test accuracy %g loss %g"%(i,  acc, lossSum/400))
+            with open('../Models/record', 'a') as file:
+                file.writelines(str(acc) + "\t" + str(lossSum/400) + "\n")
+            lossSum = 0.
         ## trianing
-        trainStep.run(feed_dict={x: imageBatch, output: labelBatch, keepProbe: 0.5, learningRate: 0.001})  #learning rate 0.001
+        [_, loss] = session.run([trainStep, crossEntropy],feed_dict={x: imageBatch, output: labelBatch, keepProbe: 0.5, learningRate: 0.001})  #learning rate 0.001
+        lossSum = lossSum + loss
 
-    ##final testing
-    print("step %d, Test accuracy %g"%(i, Testing(session)))
+    savePath = saver.save(session, "../Models/model.ckpt")
+    print("Model saved in file: %s" % savePath)
+
+    session.close()
+
 
 if __name__ == '__main__':
     TensorFlow.app.run()

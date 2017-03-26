@@ -4,10 +4,6 @@ import tensorflow as TensorFlow
 import random
 import numpy as Numpy
 
-DATA_URL = 'http://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz'
-
-ImageSize = 32
-
 def Unpickle(file):
     import _pickle as cPickle
     fo = open(file, 'rb')
@@ -29,7 +25,7 @@ def SetupCifar10TranningResources():
             record = CIFAR10Record()
             record.label = Numpy.zeros([10])
             record.label[dictionary['labels'][j]] = 1
-            record.image = Numpy.reshape(dictionary['data'][j], (32,32,3))
+            record.image = Numpy.divide(Numpy.subtract(Numpy.reshape(dictionary['data'][j], (32,32,3)), (125.3,123.0,113.9)), (63.0,62.1,66.7))
             records.append(record)
     return Numpy.array(records)
 
@@ -41,7 +37,7 @@ def SetupCifar10TestingResources():
         labelVector = Numpy.zeros([10])
         labelVector[dictionary['labels'][j]] = 1
         labels.append(labelVector)
-        images.append(Numpy.reshape(dictionary['data'][j], (32,32,3)))
+        images.append(Numpy.divide(Numpy.subtract(Numpy.reshape(dictionary['data'][j], (32,32,3)), (125.3,123.0,113.9)), (63.0,62.1,66.7)))
     return Numpy.array(images), Numpy.array(labels)
 
 def RandomCrop(batch, crop_shape, padding=None):

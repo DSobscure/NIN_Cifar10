@@ -1,7 +1,7 @@
 import tensorflow as TensorFlow
 
-def CreateWeightVariable(shape):
-    initial = TensorFlow.random_normal(shape, stddev = 0.05, dtype=TensorFlow.float32)
+def CreateWeightVariable(shape, dev = 0.05):
+    initial = TensorFlow.random_normal(shape, stddev = dev, dtype=TensorFlow.float32)
     return TensorFlow.Variable(initial)
 
 def CreateBiasVariable(shape):
@@ -18,11 +18,11 @@ def MaxPool3x3(x):
     return TensorFlow.nn.max_pool(x, ksize = [1, 3, 3, 1], strides = [1, 2, 2, 1], padding = "SAME")
 
 def AveragePool8x8(x):
-    return TensorFlow.nn.max_pool(x, ksize = [1, 8, 8, 1], strides = [1, 1, 1, 1], padding = "VALID")
+    return TensorFlow.nn.avg_pool(x, ksize = [1, 8, 8, 1], strides = [1, 1, 1, 1], padding = "VALID")
 
 def CreateNetwork(inputs, keepProbe):
     # network weights
-    convolution1Weights = CreateWeightVariable([5, 5, 3, 192])
+    convolution1Weights = CreateWeightVariable([5, 5, 3, 192], 0.005)
     convolution1Bias = CreateBiasVariable([192])
     mlp1_1Weights = CreateWeightVariable([1, 1, 192, 160])
     mlp1_1Bias = CreateBiasVariable([160])
